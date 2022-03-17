@@ -128,49 +128,93 @@ async def test(ctx):
     await ctx.respond("there")
 
 
+class Dropdown(discord.ui.Select):
+    def __init__(self, bot):
+        self.bot = bot  # For example, you can use self.bot to retrieve a user or perform other functions in the callback.
+        # Alternatively you can use Interaction.client, so you don't need to pass the bot instance.
+        # Set the options that will be presented inside the dropdown
+        options = [
+            discord.SelectOption(label="Fun", description="Full of fun commands", emoji="😁"),
+            discord.SelectOption(label="Tools", description="Boring info", emoji="🔨"),
+            discord.SelectOption(label="Economy", description="Get some money money", emoji="💵"),
+        ]
+
+        # The placeholder is what will be shown when no option is chosen
+        # The min and max values indicate we can only pick one of the three options
+        # The options parameter defines the dropdown options. We defined this above
+        super().__init__(
+            placeholder="Categories",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        # Use the interaction object to send a response message containing
+        # The user's favourite colour or choice. The self object refers to the
+        # Select object, and the values attribute gets a list of the user's
+        # selected options. We only want the first one.
+        if self.values[0] == "Fun":
+            em = discord.Embed(title="CatsyBot Help", color=discord.Colour.blurple())
+            em.add_field(name="/coinflip", value="Wanna bet? Flip a coin!")
+            em.add_field(name="/brooklyn_99", value="Quotes from this well-beloved TV show.")
+            em.add_field(name="/fun_fact", value="Another few funt facts!")
+            em.add_field(name="/say", value="Be anonymous...")
+            em.add_field(name="/meme", value="Check some memes! (family friendly)")
+            em.add_field(name="/prequel", value="Some Star Wars memes")
+            em.add_field(name="/ko", value="Knockout the person you hate!")
+            em.add_field(name="/choose", value="Can't choose? Let the bot choose for you!")
+            em.add_field(name="/ssp", value="Rock, Paper, Scissors... Shoot!")
+            em.add_field(name="/minesweeper", value="Another electronized board game")
+            await interaction.response.send_message(embed=em)
+        elif self.values[0] == "Tools":
+            em = discord.Embed(title="CatsyBot Help", color=discord.Colour.blurple())
+            em.add_field(name="/help", value="What you are seeing now")
+            em.add_field(name="/ping", value="Check how fast the bot will reply!")
+            em.add_field(name="/invite", value="Invite the bot! (not pushing but pls upvote bot)")
+            em.add_field(name="/testserver", value="Invite for the CatsyBot Test Server")
+            em.add_field(name="/member_count", value="See the server's member count")
+            em.add_field(name="/serverinfo", value="Check the server's general information")
+            await interaction.response.send_message(embed=em)
+        elif self.values[0] == "Economy":
+            em = discord.Embed(title="CatsyBot Help", color=discord.Colour.blurple())
+            em.add_field(name="/balance", value="Shows how much money you have")
+            em.add_field(name="/beg", value="Wait, you actually consider using this command? haha beggar")
+            em.add_field(name="/work", value="Gain a decent amount of money respectably")
+            em.add_field(name="/withdraw", value="Transfers some money from the bank to cash")
+            em.add_field(name="/deposit", value="Dump all your cash in the bank")
+            em.add_field(name="/pay", value="Pay your debts with another user")
+            em.add_field(name="/sell", value="Sell some of your items if you're desperate")
+            em.add_field(name="/slots", value="Bet some money (WARNING: you can lose a lot)")
+            em.add_field(name="/rob", value="Rob someone (they won't like it)")
+            em.add_field(name="/shop", value="Check out some cool stuff you can buy")
+            em.add_field(name="/buy", value="Buy some of the sick stuff you saw in the shop")
+            em.add_field(name="/inventory", value="Admire the stuff you bought")
+            em.add_field(name="/use", value="Use some of the stuff you bought")
+            em.add_field(name="/race", value="Race with your friends (you need a ferrari or bugatti to unlock this)")
+            em.add_field(name="/leaderboard", value="See if you're the richest person in CatEconomy")
+            em.add_field(name="/add_money", value="Only for admins (to anyone who ain't admin, it will say that bot didn't respond)")
+            await interaction.response.send_message(embed=em)
+
+
+class DropdownView(discord.ui.View):
+    def __init__(self, bot):
+        self.bot = bot
+        super().__init__()
+
+        # Adds the dropdown to our view object.
+        self.add_item(Dropdown(self.bot))
+
+
 @bot.slash_command(description="Categories: Fun, Tools, Economy", guild_ids=[689859328768999443])
-async def help(ctx, category):
-    if category == "Fun":
-        em = discord.Embed(title="CatsyBot Help", color=discord.Colour.blurple())
-        em.add_field(name="/coinflip", value="Wanna bet? Flip a coin!")
-        em.add_field(name="/brooklyn_99", value="Quotes from this well-beloved TV show.")
-        em.add_field(name="/fun_fact", value="Another few funt facts!")
-        em.add_field(name="/say", value="Be anonymous...")
-        em.add_field(name="/meme", value="Check some memes! (family friendly)")
-        em.add_field(name="/prequel", value="Some Star Wars memes")
-        em.add_field(name="/ko", value="Knockout the person you hate!")
-        em.add_field(name="/choose", value="Can't choose? Let the bot choose for you!")
-        em.add_field(name="/ssp", value="Rock, Paper, Scissors... Shoot!")
-        em.add_field(name="/minesweeper", value="Another electronized board game")
-        await ctx.respond(embed=em)
-    elif category == "Tools":
-        em = discord.Embed(title="CatsyBot Help", color=discord.Colour.blurple())
-        em.add_field(name="/help", value="What you are seeing now")
-        em.add_field(name="/ping", value="Check how fast the bot will reply!")
-        em.add_field(name="/invite", value="Invite the bot! (not pushing but pls upvote bot)")
-        em.add_field(name="/testserver", value="Invite for the CatsyBot Test Server")
-        em.add_field(name="/member_count", value="See the server's member count")
-        em.add_field(name="/serverinfo", value="Check the server's general information")
-        await ctx.respond(embed=em)
-    elif category == "Economy":
-        em = discord.Embed(title="CatsyBot Help", color=discord.Colour.blurple())
-        em.add_field(name="/balance", value="Shows how much money you have")
-        em.add_field(name="/beg", value="Wait, you actually consider using this command? haha beggar")
-        em.add_field(name="/work", value="Gain a decent amount of money respectably")
-        em.add_field(name="/withdraw", value="Transfers some money from the bank to cash")
-        em.add_field(name="/deposit", value="Dump all your cash in the bank")
-        em.add_field(name="/pay", value="Pay your debts with another user")
-        em.add_field(name="/sell", value="Sell some of your items if you're desperate")
-        em.add_field(name="/slots", value="Bet some money (WARNING: you can lose a lot)")
-        em.add_field(name="/rob", value="Rob someone (they won't like it)")
-        em.add_field(name="/shop", value="Check out some cool stuff you can buy")
-        em.add_field(name="/buy", value="Buy some of the sick stuff you saw in the shop")
-        em.add_field(name="/inventory", value="Admire the stuff you bought")
-        em.add_field(name="/use", value="Use some of the stuff you bought")
-        em.add_field(name="/race", value="Race with your friends (you need a ferrari or bugatti to unlock this)")
-        em.add_field(name="/leaderboard", value="See if you're the richest person in CatEconomy")
-        em.add_field(name="/add_money", value="Only for admins (to anyone who ain't admin, it will say that bot didn't respond)")
-        await ctx.respond(embed=em)
+async def help(ctx):
+    view = DropdownView(bot)
+    embed = discord.Embed(title="CatsyBot Help", description="Choose down below what category to check", colour=discord.Colour.blurple())
+    embed.set_thumbnail(url=bot.user.avatar.url)
+    embed.add_field(name="Server Count", value=len(bot.guilds))
+    embed.add_field(name="User Count", value=len(bot.users))
+    embed.add_field(name="Ping", value=f"{bot.latency * 1000:.2f}ms")
+    await ctx.respond(embed=embed, view=view)
 
 
 @bot.slash_command(guild_ids=[689859328768999443])
